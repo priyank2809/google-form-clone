@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "http-server . -c-1 -p 8080 --cors -o",
-    "build": "tsc && mkdir -p docs && copy index.html docs/ && copy -r dist docs/",
+    "build": "tsc",
     "dev": "tsc --watch",
     "serve": "http-server . -c-1 -p 8080 --cors",
     "predeploy": "npm run build",
-    "deploy": "node deploy.js"
+    "deploy": "gh-pages -d ."
   },
   "keywords": [],
   "author": "Priyank_Bhagat",
