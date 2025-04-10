@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form Clone</title>
+    <style>
+        /* Reset and Base Styles */
+        :root {
+            --primary-color: #673AB7;
+            --border-color: #DADCE0;
+            --text-color: #202124;
+            --error-color: #d93025;
+            --success-color: #34A853;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #F0EBF8;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 768px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16x;
+            padding-bottom: 16px;
+        }
+
+        .forms-grid {
+            display: grid;
+            gap: 24px;
+            padding-top: 8px;
+        }
+
+        /* Form Card Styles */
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin: 0;
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .form-card:hover {
+            box-shadow: 0 2px 4px 0 rgba(60, 64, 67, 0.302);
+        }
+
+        .form-header {
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-title {
+            font-size: 32px;
+            color: var(--text-color);
+            border: none;
+            width: 100%;
+            padding: 8px 0;
+            margin-bottom: 8px;
+            outline: none;
+            font-weight: 400;
+        }
+
+        .form-title:focus {
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Field Styles */
+        .field {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .field:hover {
+            border-color: var(--primary-color);
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .field-label {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 0;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid transparent;
+            outline: none;
+        }
+
+        .field-label:focus {
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Options Styling */
+        .option-container {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-input {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .add-option-btn {
+            color: var(--primary-color);
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .button {
+            padding: 8px 24px;
+            border-radius: 4px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .button.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .button.primary:hover {
+            background-color: #5c33a4;
+        }
+
+        .button.secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .button.secondary:hover {
+            background-color: rgba(103, 58, 183, 0.04);
+        }
+
+        /* Preview Form Styles */
+        .preview-form {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .form-field {
+            margin-bottom: 24px;
+        }
+
+        .form-field label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-field input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        /* Radio and Checkbox Styles */
+        .radio-option,
+        .checkbox-option {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 16px;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Dialog Styles */
+        .dialog-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .dialog-title {
+            margin-bottom: 24px;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .dialog-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .field-type-select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .field-label-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .option-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .field-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .field-action {
+            padding: 4px 8px;
+            min-width: 60px;
+            font-size: 13px;
+        }
+
+        .remove-option {
+            padding: 4px 8px;
+            min-width: unset;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .field-label {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 0;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid transparent;
+            outline: none;
+            background: transparent;
+        }
+
+        .field-label:disabled {
+            color: var(--text-color);
+            cursor: default;
+        }
+
+        .field-label:not(:disabled) {
+            border-bottom-color: var(--primary-color);
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .edit-hint {
+            color: var(--primary-color);
+            font-size: 12px;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .field-action.editing {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .fields-container {
+            min-height: 100px;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .field {
+            cursor: move;
+            user-select: none;
+            background: white;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .field:last-child {
+            margin-bottom: 0;
+        }
+
+        .field.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary-color);
+        }
+
+        .field:not(.dragging) {
+            transition: transform 0.2s;
+        }
+
+        .analytics-container {
+            margin-top: 24px;
+        }
+
+        .field-analytics {
+            background: white;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-bar {
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        .required-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            color: #666;
+        }
+
+        .form-title-input {
+            font-size: 32px;
+            font-weight: 400;
+            color: var(--text-color);
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+            outline: none;
+        }
+
+        .form-title-input:focus {
+            box-shadow: 0 2px 4px rgba(60, 64, 67, 0.3);
+        }
+
+        #formBuilder {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #fieldList {
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        #formList {
+            padding: 16px 0;
+        }
+
+        #responsesView {
+            display: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #1a73e8;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .form-card-actions {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .field-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .field-label {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="formList">
+            <!-- forms will be listed here -->
+        </div>
+
+        <div id="formBuilder">
+            <div class="form-title-container">
+                <input type="text" class="form-title-input" id="formTitle" placeholder="Form Title" autocomplete="off">
+            </div>
+            <div id="fieldList">
+                <!-- form fields will be added here -->
+            </div>
+            <div class="form-actions">
+                <button id="addFieldBtn" class="button primary">Add Field</button>
+                <button id="saveFormBtn" class="button secondary">Save Form</button>
+                <button class="button back-to-forms">Back to Forms</button>
+            </div>
+        </div>
+
+        <div id="formPreview">
+            <!-- form preview will be rendered here -->
+        </div>
+
+        <div id="responsesView">
+            <!-- form responses will be displayed here -->
+        </div>
+    </div>
+
+    <div id="fieldTypeDialog" style="display: none;" class="dialog-overlay">
+        <div class="dialog">
+            <h3 class="dialog-title">Add New Field</h3>
+            <div class="dialog-content">
+                <div class="input-group">
+                    <select id="fieldType" class="field-type-select">
+                        <option value="text">Text Input</option>
+                        <option value="radio">Multiple Choice (Radio)</option>
+                        <option value="checkbox">Checkboxes</option>
+                    </select>
+                    <input type="text" id="fieldLabel" class="field-label-input" placeholder="Question/Field Label">
+                </div>
+
+                <div id="optionsContainer" class="options-container" style="display: none;">
+                    <!-- options will be added here -->
+                </div>
+
+                <div class="dialog-buttons">
+                    <button id="addOptionBtn" class="button secondary" style="display: none;">
+                        Add Option
+                    </button>
+                </div>
+
+                <div class="dialog-actions">
+                    <button id="cancelFieldAdd" class="button secondary">Cancel</button>
+                    <button id="addFieldConfirm" class="button primary">Add Field</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./dist/main.js"></script>
+</body>
+
+</html>
