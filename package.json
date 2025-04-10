@@ -1,7 +1,7 @@
 {
   "name": "google-form",
   "version": "1.0.0",
-  "homepage": "https://github.com/priyank2809/google-form-clone.git",
+  "homepage": "https://github.com/priyank2809/google-form-clone",
   "main": "index.js",
   "scripts": {
     "start": "http-server . -c-1 -p 8080 --cors -o",
