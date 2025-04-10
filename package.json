@@ -9,7 +9,7 @@
     "dev": "tsc --watch",
     "serve": "http-server . -c-1 -p 8080 --cors",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d ."
+    "deploy": "node deploy.js"
   },
   "keywords": [],
   "author": "Priyank_Bhagat",
