@@ -581,7 +581,20 @@
         </div>
     </div>
 
-    <script type="module" src="main.js"></script>
+    <script type="module">
+        const isGitHubPages = window.location.hostname.includes('github.io');
+
+        const script = document.createElement('script');
+        script.type = 'module';
+
+        if (isGitHubPages) {
+          script.src = 'main.js';
+        } else {
+          script.src = './dist/main.js';
+        }
+
+        document.body.appendChild(script);
+      </script>
 </body>
 
 </html>
