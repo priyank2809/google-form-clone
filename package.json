@@ -1,0 +1,19 @@
+{
+  "name": "google-form",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server . -c-1 -p 8080 --cors -o",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "http-server . -c-1 -p 8080 --cors"
+  },
+  "keywords": [],
+  "author": "Priyank_Bhagat",
+  "license": "ISC",
+  "description": "Google Form-like application in TypeScript",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "typescript": "^5.7.2"
+  }
+}
