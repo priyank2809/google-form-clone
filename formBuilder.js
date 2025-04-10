@@ -1,26 +1,19 @@
 import { StorageService } from './storage.js';
-import { IForm, IFormField, FieldType, IFieldOption, DragPosition } from './types.js';
-
+import { FieldType } from './types.js';
 export class FormBuilder {
-    private storageService: StorageService;
-    private currentForm: IForm | null = null;
-    private formContainer: HTMLElement;
-    private fieldListContainer: HTMLElement;
-
     constructor() {
+        this.currentForm = null;
         this.storageService = new StorageService();
-        this.formContainer = document.getElementById('formBuilder') as HTMLElement;
-        this.fieldListContainer = document.getElementById('fieldList') as HTMLElement;
+        this.formContainer = document.getElementById('formBuilder');
+        this.fieldListContainer = document.getElementById('fieldList');
         this.initializeEventListeners();
         this.initializeDragAndDrop();
     }
-
-    private initializeEventListeners(): void {
+    initializeEventListeners() {
         const addFieldBtn = document.getElementById('addFieldBtn');
         if (addFieldBtn) {
             addFieldBtn.addEventListener('click', () => this.showAddFieldDialog());
         }
-
         const saveFormBtn = document.getElementById('saveFormBtn');
         if (saveFormBtn) {
             saveFormBtn.addEventListener('click', (e) => {
@@ -28,17 +21,14 @@ export class FormBuilder {
                 this.saveForm();
             });
         }
-
         const addFieldConfirmBtn = document.getElementById('addFieldConfirm');
         if (addFieldConfirmBtn) {
             addFieldConfirmBtn.addEventListener('click', () => this.addNewField());
         }
-
         const cancelFieldAddBtn = document.getElementById('cancelFieldAdd');
         if (cancelFieldAddBtn) {
             cancelFieldAddBtn.addEventListener('click', () => this.hideAddFieldDialog());
         }
-
         const fieldTypeSelect = document.getElementById('fieldType');
         if (fieldTypeSelect) {
             fieldTypeSelect.addEventListener('change', () => {
@@ -46,7 +36,6 @@ export class FormBuilder {
                 this.toggleOptionsContainer();
             });
         }
-
         const addOptionBtn = document.getElementById('addOptionBtn');
         if (addOptionBtn) {
             addOptionBtn.addEventListener('click', (e) => {
@@ -55,15 +44,13 @@ export class FormBuilder {
             });
         }
     }
-
-    private resetOptionsContainer(): void {
-        const optionsContainer = document.getElementById('optionsContainer') as HTMLElement;
+    resetOptionsContainer() {
+        const optionsContainer = document.getElementById('optionsContainer');
         optionsContainer.innerHTML = '';
-        const addOptionBtn = document.getElementById('addOptionBtn') as HTMLElement;
+        const addOptionBtn = document.getElementById('addOptionBtn');
         addOptionBtn.style.display = 'none';
     }
-
-    public createNewForm(): void {
+    createNewForm() {
         this.currentForm = {
             id: crypto.randomUUID(),
             title: '',
@@ -73,99 +60,82 @@ export class FormBuilder {
         };
         this.renderFormBuilder();
     }
-
-    public loadForm(formId: string): void {
+    loadForm(formId) {
         const form = this.storageService.getFormById(formId);
         if (form) {
             this.currentForm = form;
             this.renderFormBuilder();
         }
     }
-
-    private showAddFieldDialog(): void {
+    showAddFieldDialog() {
         if (this.currentForm) {
-            const titleInput = document.getElementById('formTitle') as HTMLInputElement;
+            const titleInput = document.getElementById('formTitle');
             this.currentForm.title = titleInput.value;
         }
-    
-        const dialog = document.getElementById('fieldTypeDialog') as HTMLElement;
+        const dialog = document.getElementById('fieldTypeDialog');
         dialog.style.display = 'block';
-    
-        (document.getElementById('fieldLabel') as HTMLInputElement).value = '';
-        (document.getElementById('fieldType') as HTMLSelectElement).value = FieldType.TEXT;
+        document.getElementById('fieldLabel').value = '';
+        document.getElementById('fieldType').value = FieldType.TEXT;
         this.resetOptionsContainer();
         this.toggleOptionsContainer();
     }
-
-    private hideAddFieldDialog(): void {
-        const dialog = document.getElementById('fieldTypeDialog') as HTMLElement;
+    hideAddFieldDialog() {
+        const dialog = document.getElementById('fieldTypeDialog');
         dialog.style.display = 'none';
         this.resetOptionsContainer();
     }
-
-    private toggleOptionsContainer(): void {
-        const fieldType = (document.getElementById('fieldType') as HTMLSelectElement).value;
-        const optionsContainer = document.getElementById('optionsContainer') as HTMLElement;
-        const addOptionBtn = document.getElementById('addOptionBtn') as HTMLElement;
-
+    toggleOptionsContainer() {
+        const fieldType = document.getElementById('fieldType').value;
+        const optionsContainer = document.getElementById('optionsContainer');
+        const addOptionBtn = document.getElementById('addOptionBtn');
         if (fieldType === FieldType.RADIO || fieldType === FieldType.CHECKBOX) {
             optionsContainer.style.display = 'block';
             addOptionBtn.style.display = 'block';
-
             if (optionsContainer.children.length === 0) {
                 this.addOptionField();
             }
-        } else {
+        }
+        else {
             optionsContainer.style.display = 'none';
             addOptionBtn.style.display = 'none';
         }
     }
-
-    private addOptionField(): void {
-        const optionsContainer = document.getElementById('optionsContainer') as HTMLElement;
+    addOptionField() {
+        const optionsContainer = document.getElementById('optionsContainer');
         const optionDiv = document.createElement('div');
         optionDiv.className = 'option-container';
-
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'option-input';
         input.placeholder = 'Enter option';
-
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.className = 'remove-option button secondary';
         removeBtn.textContent = '×';
         removeBtn.style.padding = '4px 8px';
-
         removeBtn.addEventListener('click', () => {
             optionDiv.remove();
         });
-
         optionDiv.appendChild(input);
         optionDiv.appendChild(removeBtn);
         optionsContainer.appendChild(optionDiv);
-
         input.focus();
     }
-
-    private addNewField(): void {
-        if (!this.currentForm) return;
-
-        const fieldType = (document.getElementById('fieldType') as HTMLSelectElement).value as FieldType;
-        const fieldLabel = (document.getElementById('fieldLabel') as HTMLInputElement).value;
-
-        const newField: IFormField = {
+    addNewField() {
+        if (!this.currentForm)
+            return;
+        const fieldType = document.getElementById('fieldType').value;
+        const fieldLabel = document.getElementById('fieldLabel').value;
+        const newField = {
             id: crypto.randomUUID(),
             type: fieldType,
             label: fieldLabel,
             order: this.currentForm.fields.length,
             required: false
         };
-
         if (fieldType === FieldType.RADIO || fieldType === FieldType.CHECKBOX) {
-            const options: IFieldOption[] = [];
-            const optionInputs = document.querySelectorAll('.option-input') as NodeListOf<HTMLInputElement>;
-
+            const options = [];
+            const optionInputs = document.querySelectorAll('.option-input');
             optionInputs.forEach((input, index) => {
                 if (input.value.trim()) {
                     options.push({
@@ -175,89 +145,72 @@ export class FormBuilder {
                     });
                 }
             });
-
             newField.options = options;
         }
-
         this.currentForm.fields.push(newField);
         this.hideAddFieldDialog();
         this.renderFormBuilder();
     }
-
-    private editField(fieldId: string): void {
-        if (!this.currentForm) return;
-
+    editField(fieldId) {
+        if (!this.currentForm)
+            return;
         const field = this.currentForm.fields.find(f => f.id === fieldId);
-        if (!field) return;
-
-        const dialog = document.getElementById('fieldTypeDialog') as HTMLElement;
+        if (!field)
+            return;
+        const dialog = document.getElementById('fieldTypeDialog');
         dialog.style.display = 'block';
-
-        (document.getElementById('fieldType') as HTMLSelectElement).value = field.type;
-        (document.getElementById('fieldLabel') as HTMLInputElement).value = field.label;
-
+        document.getElementById('fieldType').value = field.type;
+        document.getElementById('fieldLabel').value = field.label;
         if (field.type === FieldType.RADIO || field.type === FieldType.CHECKBOX) {
-            const optionsContainer = document.getElementById('optionsContainer') as HTMLElement;
-            const addOptionBtn = document.getElementById('addOptionBtn') as HTMLElement;
-
+            const optionsContainer = document.getElementById('optionsContainer');
+            const addOptionBtn = document.getElementById('addOptionBtn');
             optionsContainer.style.display = 'block';
             addOptionBtn.style.display = 'block';
             optionsContainer.innerHTML = '';
-
             field.options?.forEach(option => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option-container';
-
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'option-input';
                 input.value = option.label;
-
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'remove-option button secondary';
                 removeBtn.textContent = '×';
                 removeBtn.addEventListener('click', () => optionDiv.remove());
-
                 optionDiv.appendChild(input);
                 optionDiv.appendChild(removeBtn);
                 optionsContainer.appendChild(optionDiv);
             });
         }
-
         const addFieldBtn = document.getElementById('addFieldConfirm');
         if (addFieldBtn) {
             addFieldBtn.textContent = 'Update Field';
-
             const newAddFieldBtn = addFieldBtn.cloneNode(true);
             addFieldBtn.parentNode?.replaceChild(newAddFieldBtn, addFieldBtn);
-
             newAddFieldBtn.addEventListener('click', () => {
                 this.updateField(fieldId);
                 this.hideAddFieldDialog();
             });
         }
     }
-
-    private updateField(fieldId: string): void {
-        if (!this.currentForm) return;
-
+    updateField(fieldId) {
+        if (!this.currentForm)
+            return;
         const fieldIndex = this.currentForm.fields.findIndex(f => f.id === fieldId);
-        if (fieldIndex === -1) return;
-
-        const fieldType = (document.getElementById('fieldType') as HTMLSelectElement).value as FieldType;
-        const fieldLabel = (document.getElementById('fieldLabel') as HTMLInputElement).value;
-
-        const updatedField: IFormField = {
+        if (fieldIndex === -1)
+            return;
+        const fieldType = document.getElementById('fieldType').value;
+        const fieldLabel = document.getElementById('fieldLabel').value;
+        const updatedField = {
             ...this.currentForm.fields[fieldIndex],
             type: fieldType,
             label: fieldLabel,
         };
-
         if (fieldType === FieldType.RADIO || fieldType === FieldType.CHECKBOX) {
-            const options: IFieldOption[] = [];
-            const optionInputs = document.querySelectorAll('.option-input') as NodeListOf<HTMLInputElement>;
-
+            const options = [];
+            const optionInputs = document.querySelectorAll('.option-input');
             optionInputs.forEach((input, index) => {
                 if (input.value.trim()) {
                     options.push({
@@ -267,35 +220,29 @@ export class FormBuilder {
                     });
                 }
             });
-
             updatedField.options = options;
         }
-
         this.currentForm.fields[fieldIndex] = updatedField;
         this.renderFormBuilder();
     }
-
-    private renderFormBuilder(): void {
-        if (!this.currentForm) return;
-
-        const titleInput = document.getElementById('formTitle') as HTMLInputElement;
+    renderFormBuilder() {
+        if (!this.currentForm)
+            return;
+        const titleInput = document.getElementById('formTitle');
         if (titleInput && (!titleInput.value || titleInput.value !== this.currentForm.title)) {
             titleInput.value = this.currentForm.title;
         }
-
         this.fieldListContainer.innerHTML = `
             <div class="fields-container">
                 ${this.currentForm.fields
-                .sort((a, b) => a.order - b.order)
-                .map(field => this.renderFormField(field))
-                .join('')}
+            .sort((a, b) => a.order - b.order)
+            .map(field => this.renderFormField(field))
+            .join('')}
             </div>
         `;
-
         this.addFieldEventListeners();
     }
-
-    private addRequiredFieldToggle(field: IFormField): string {
+    addRequiredFieldToggle(field) {
         return `
             <div class="field-options">
                 <label class="required-toggle">
@@ -308,8 +255,7 @@ export class FormBuilder {
             </div>
         `;
     }
-
-    private renderFormField(field: IFormField): string {
+    renderFormField(field) {
         let fieldHtml = `
         <div class="field" data-field-id="${field.id}" draggable="true" data-order="${field.order}">
             <div class="field-header">
@@ -345,7 +291,6 @@ export class FormBuilder {
             </div>
             ${this.addRequiredFieldToggle(field)}
         `;
-
         switch (field.type) {
             case FieldType.TEXT:
                 fieldHtml += `<input type="text" class="preview-input" disabled placeholder="Text input field">`;
@@ -371,49 +316,45 @@ export class FormBuilder {
                 </div>`;
                 break;
         }
-
         fieldHtml += '</div>';
         return fieldHtml;
     }
-
-    private toggleRequired(fieldId: string, checked: boolean): void {
-        if (!this.currentForm) return;
+    toggleRequired(fieldId, checked) {
+        if (!this.currentForm)
+            return;
         const field = this.currentForm.fields.find(f => f.id === fieldId);
         if (field) {
             field.required = checked;
             this.renderFormBuilder();
         }
     }
-
-    private toggleFieldEditMode(fieldElement: HTMLElement, isEditing: boolean): void {
-        const labelInput = fieldElement.querySelector('.field-label') as HTMLInputElement;
-        const editHint = fieldElement.querySelector('.edit-hint') as HTMLElement;
-        const editButton = fieldElement.querySelector('.edit-field') as HTMLButtonElement;
-
+    toggleFieldEditMode(fieldElement, isEditing) {
+        const labelInput = fieldElement.querySelector('.field-label');
+        const editHint = fieldElement.querySelector('.edit-hint');
+        const editButton = fieldElement.querySelector('.edit-field');
         if (isEditing) {
             labelInput.disabled = false;
             labelInput.focus();
             editHint.style.display = 'block';
             editButton.innerHTML = '<span>✓</span> Save';
             editButton.classList.add('editing');
-        } else {
+        }
+        else {
             labelInput.disabled = true;
             editHint.style.display = 'none';
             editButton.innerHTML = '<span>✎</span> Edit';
             editButton.classList.remove('editing');
         }
     }
-
-    private addFieldEventListeners(): void {
+    addFieldEventListeners() {
         document.querySelectorAll('.edit-field').forEach(button => {
             button.addEventListener('click', (e) => {
-                const fieldElement = (e.target as HTMLElement).closest('.field') as HTMLElement;
-                const editButton = e.target as HTMLElement;
+                const fieldElement = e.target.closest('.field');
+                const editButton = e.target;
                 const isEditing = editButton.classList.contains('editing');
-
                 if (isEditing) {
                     const fieldId = fieldElement.getAttribute('data-field-id');
-                    const labelInput = fieldElement.querySelector('.field-label') as HTMLInputElement;
+                    const labelInput = fieldElement.querySelector('.field-label');
                     if (fieldId && this.currentForm) {
                         const field = this.currentForm.fields.find(f => f.id === fieldId);
                         if (field) {
@@ -421,36 +362,34 @@ export class FormBuilder {
                         }
                     }
                     this.toggleFieldEditMode(fieldElement, false);
-                } else {
+                }
+                else {
                     this.toggleFieldEditMode(fieldElement, true);
                 }
             });
         });
-
         document.querySelectorAll('.delete-field').forEach(button => {
             button.addEventListener('click', (e) => {
-                const fieldElement = (e.target as HTMLElement).closest('.field');
+                const fieldElement = e.target.closest('.field');
                 if (fieldElement) {
                     const fieldId = fieldElement.getAttribute('data-field-id');
-                    this.deleteField(fieldId!);
+                    this.deleteField(fieldId);
                 }
             });
         });
-
         document.querySelectorAll('.move-up, .move-down').forEach(button => {
             button.addEventListener('click', (e) => {
-                const direction = (e.target as HTMLElement).classList.contains('move-up') ? 'up' : 'down';
-                const fieldElement = (e.target as HTMLElement).closest('.field');
+                const direction = e.target.classList.contains('move-up') ? 'up' : 'down';
+                const fieldElement = e.target.closest('.field');
                 if (fieldElement) {
                     const fieldId = fieldElement.getAttribute('data-field-id');
-                    this.moveField(fieldId!, direction);
+                    this.moveField(fieldId, direction);
                 }
             });
         });
-
         document.querySelectorAll('.required-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
-                const target = e.target as HTMLInputElement;
+                const target = e.target;
                 const fieldId = target.getAttribute('data-field-id');
                 if (fieldId) {
                     this.toggleRequired(fieldId, target.checked);
@@ -458,51 +397,44 @@ export class FormBuilder {
             });
         });
     }
-
-    private deleteField(fieldId: string): void {
-        if (!this.currentForm) return;
-
+    deleteField(fieldId) {
+        if (!this.currentForm)
+            return;
         this.currentForm.fields = this.currentForm.fields.filter(field => field.id !== fieldId);
         this.renderFormBuilder();
     }
-
-    private moveField(fieldId: string, direction: 'up' | 'down'): void {
-        if (!this.currentForm) return;
-
+    moveField(fieldId, direction) {
+        if (!this.currentForm)
+            return;
         const currentIndex = this.currentForm.fields.findIndex(field => field.id === fieldId);
-        if (currentIndex === -1) return;
-
+        if (currentIndex === -1)
+            return;
         const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        if (newIndex < 0 || newIndex >= this.currentForm.fields.length) return;
-
+        if (newIndex < 0 || newIndex >= this.currentForm.fields.length)
+            return;
         const temp = this.currentForm.fields[currentIndex].order;
         this.currentForm.fields[currentIndex].order = this.currentForm.fields[newIndex].order;
         this.currentForm.fields[newIndex].order = temp;
-
         this.renderFormBuilder();
     }
-
-    private saveForm(): void {
-        if (!this.currentForm) return;
-
-        const titleInput = document.getElementById('formTitle') as HTMLInputElement;
+    saveForm() {
+        if (!this.currentForm)
+            return;
+        const titleInput = document.getElementById('formTitle');
         this.currentForm.title = titleInput.value;
         this.currentForm.updatedAt = new Date().toISOString();
-
         document.querySelectorAll('.field').forEach(fieldElement => {
             const fieldId = fieldElement.getAttribute('data-field-id');
-            const labelInput = fieldElement.querySelector('.field-label') as HTMLInputElement;
-            const field = this.currentForm!.fields.find(f => f.id === fieldId);
+            const labelInput = fieldElement.querySelector('.field-label');
+            const field = this.currentForm.fields.find(f => f.id === fieldId);
             if (field && labelInput) {
                 field.label = labelInput.value;
             }
         });
-
         this.storageService.saveForm(this.currentForm);
         alert('Form saved successfully!');
     }
-
-    private renderOptionCustomization(option: IFieldOption, fieldId: string): string {
+    renderOptionCustomization(option, fieldId) {
         return `
         <div class="option-item" data-option-id="${option.id}">
             <input type="text" 
@@ -513,9 +445,9 @@ export class FormBuilder {
         </div>
     `;
     }
-
-    private updateOption(fieldId: string, optionId: string, newLabel: string): void {
-        if (!this.currentForm) return;
+    updateOption(fieldId, optionId, newLabel) {
+        if (!this.currentForm)
+            return;
         const field = this.currentForm.fields.find(f => f.id === fieldId);
         if (field && field.options) {
             const option = field.options.find(o => o.id === optionId);
@@ -524,73 +456,67 @@ export class FormBuilder {
             }
         }
     }
-
-    private initializeDragAndDrop(): void {
-        document.addEventListener('dragstart', (e: Event) => {
-            const dragEvent = e as DragEvent;
-            const target = dragEvent.target as HTMLElement;
+    initializeDragAndDrop() {
+        document.addEventListener('dragstart', (e) => {
+            const dragEvent = e;
+            const target = dragEvent.target;
             const draggedField = target.closest('.field');
             if (draggedField) {
                 draggedField.classList.add('dragging');
             }
         });
-
-        document.addEventListener('dragend', (e: Event) => {
-            const dragEvent = e as DragEvent;
+        document.addEventListener('dragend', (e) => {
+            const dragEvent = e;
             const draggedField = document.querySelector('.dragging');
             if (draggedField) {
                 draggedField.classList.remove('dragging');
                 this.updateFieldOrder();
             }
         });
-
-        document.addEventListener('dragover', (e: Event) => {
-            const dragEvent = e as DragEvent;
+        document.addEventListener('dragover', (e) => {
+            const dragEvent = e;
             dragEvent.preventDefault();
             const fieldsContainer = document.querySelector('.fields-container');
-            if (!fieldsContainer) return;
-
-            const afterElement = this.getDragAfterElement(fieldsContainer as HTMLElement, dragEvent.clientY);
+            if (!fieldsContainer)
+                return;
+            const afterElement = this.getDragAfterElement(fieldsContainer, dragEvent.clientY);
             const draggable = document.querySelector('.dragging');
             if (draggable) {
                 if (afterElement == null) {
                     fieldsContainer.appendChild(draggable);
-                } else {
+                }
+                else {
                     fieldsContainer.insertBefore(draggable, afterElement);
                 }
             }
         });
     }
-
-    private getDragAfterElement(container: HTMLElement, y: number): Element | null {
+    getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.field:not(.dragging)')];
-
-        return draggableElements.reduce<Element | null>((closest, child) => {
+        return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
-
             if (offset < 0 && offset > (closest?.getBoundingClientRect().top ?? Number.NEGATIVE_INFINITY)) {
                 return child;
-            } else {
+            }
+            else {
                 return closest;
             }
         }, null);
     }
-
-    private updateFieldOrder(): void {
-        if (!this.currentForm) return;
-
+    updateFieldOrder() {
+        if (!this.currentForm)
+            return;
         const fields = document.querySelectorAll('.field');
         fields.forEach((field, index) => {
             const fieldId = field.getAttribute('data-field-id');
             if (fieldId) {
-                const formField = this.currentForm!.fields.find(f => f.id === fieldId);
+                const formField = this.currentForm.fields.find(f => f.id === fieldId);
                 if (formField) {
                     formField.order = index;
                 }
             }
         });
-
         this.saveForm();
     }
 }

@@ -1,53 +1,42 @@
-import { IForm, IFormResponse } from './types.js';
-
 export class StorageService {
-    private readonly FORMS_KEY = 'forms';
-    private readonly RESPONSES_KEY = 'form_responses';
-
-    public saveForm(form: IForm): void {
+    constructor() {
+        this.FORMS_KEY = 'forms';
+        this.RESPONSES_KEY = 'form_responses';
+    }
+    saveForm(form) {
         const forms = this.getForms();
         const existingFormIndex = forms.findIndex(f => f.id === form.id);
-        
         if (existingFormIndex >= 0) {
             forms[existingFormIndex] = form;
-        } else {
+        }
+        else {
             forms.push(form);
         }
-        
         localStorage.setItem(this.FORMS_KEY, JSON.stringify(forms));
     }
-
-    public getForms(): IForm[] {
+    getForms() {
         const formsJson = localStorage.getItem(this.FORMS_KEY);
         return formsJson ? JSON.parse(formsJson) : [];
     }
-
-    public getFormById(id: string): IForm | null {
+    getFormById(id) {
         const forms = this.getForms();
         return forms.find(form => form.id === id) || null;
     }
-
-    public deleteForm(id: string): void {
+    deleteForm(id) {
         const forms = this.getForms().filter(form => form.id !== id);
         localStorage.setItem(this.FORMS_KEY, JSON.stringify(forms));
         this.deleteFormResponses(id);
     }
-
-    public saveFormResponse(response: IFormResponse): void {
+    saveFormResponse(response) {
         const responses = this.getFormResponses(response.formId);
         responses.push(response);
-        localStorage.setItem(
-            `${this.RESPONSES_KEY}_${response.formId}`,
-            JSON.stringify(responses)
-        );
+        localStorage.setItem(`${this.RESPONSES_KEY}_${response.formId}`, JSON.stringify(responses));
     }
-
-    public getFormResponses(formId: string): IFormResponse[] {
+    getFormResponses(formId) {
         const responsesJson = localStorage.getItem(`${this.RESPONSES_KEY}_${formId}`);
         return responsesJson ? JSON.parse(responsesJson) : [];
     }
-
-    private deleteFormResponses(formId: string): void {
+    deleteFormResponses(formId) {
         localStorage.removeItem(`${this.RESPONSES_KEY}_${formId}`);
     }
 }

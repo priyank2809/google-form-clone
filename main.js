@@ -1,88 +1,72 @@
 import { FormBuilder } from './formBuilder.js';
 import { StorageService } from './storage.js';
-import { IForm, IFormResponse, FieldType } from './types.js';
-
+import { FieldType } from './types.js';
 class FormApp {
-    private formBuilder: FormBuilder;
-    private storageService: StorageService;
-    private formListContainer: HTMLElement;
-    private formBuilderContainer: HTMLElement;
-    private formPreviewContainer: HTMLElement;
-    private responsesContainer: HTMLElement;
-
     constructor() {
         this.formBuilder = new FormBuilder();
         this.storageService = new StorageService();
-
-        this.formListContainer = document.getElementById('formList') as HTMLElement;
-        this.formBuilderContainer = document.getElementById('formBuilder') as HTMLElement;
-        this.formPreviewContainer = document.getElementById('formPreview') as HTMLElement;
-        this.responsesContainer = document.getElementById('responsesView') as HTMLElement;
-
+        this.formListContainer = document.getElementById('formList');
+        this.formBuilderContainer = document.getElementById('formBuilder');
+        this.formPreviewContainer = document.getElementById('formPreview');
+        this.responsesContainer = document.getElementById('responsesView');
         this.initialize();
     }
-
-    private initialize(): void {
+    initialize() {
         this.showFormList();
-
         this.setupEventListeners();
     }
-
-    private setupEventListeners(): void {
+    setupEventListeners() {
         const newFormBtn = document.getElementById('newFormBtn');
         if (newFormBtn) {
             newFormBtn.addEventListener('click', () => this.createNewForm());
         }
-
         document.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
-
+            const target = e.target;
             if (target.matches('.back-to-forms, .back-to-forms *')) {
                 e.preventDefault();
                 this.showFormList();
                 return;
             }
-
             if (target.matches('[data-action="edit-form"]')) {
                 const formId = target.getAttribute('data-form-id');
-                if (formId) this.editForm(formId);
+                if (formId)
+                    this.editForm(formId);
             }
             else if (target.matches('[data-action="preview-form"]')) {
                 const formId = target.getAttribute('data-form-id');
-                if (formId) this.previewForm(formId);
+                if (formId)
+                    this.previewForm(formId);
             }
             else if (target.matches('[data-action="delete-form"]')) {
                 const formId = target.getAttribute('data-form-id');
-                if (formId) this.deleteForm(formId);
+                if (formId)
+                    this.deleteForm(formId);
             }
             else if (target.matches('[data-action="view-responses"]')) {
                 const formId = target.getAttribute('data-form-id');
-                if (formId) this.viewResponses(formId);
+                if (formId)
+                    this.viewResponses(formId);
             }
             else if (target.matches('[data-action="export-data"]')) {
                 const formId = target.getAttribute('data-form-id');
-                if (formId) this.exportFormData(formId);
+                if (formId)
+                    this.exportFormData(formId);
             }
         });
-
         document.addEventListener('submit', (e) => {
-            const target = e.target as HTMLElement;
+            const target = e.target;
             if (target.matches('#previewFormElement')) {
                 e.preventDefault();
-                this.handleFormSubmission(e.target as HTMLFormElement);
+                this.handleFormSubmission(e.target);
             }
         });
     }
-
-    private showFormList(): void {
+    showFormList() {
         this.formBuilderContainer.style.display = 'none';
         this.formPreviewContainer.style.display = 'none';
         this.responsesContainer.style.display = 'none';
-
         this.formListContainer.style.display = 'block';
-
         const forms = this.storageService.getForms();
-
         this.formListContainer.innerHTML = `
             <div class="container">
                 <div class="header">
@@ -94,36 +78,29 @@ class FormApp {
                 </div>
             </div>
         `;
-
         const newFormBtn = document.getElementById('newFormBtn');
         if (newFormBtn) {
             newFormBtn.addEventListener('click', () => this.createNewForm());
         }
     }
-
-    private exportFormData(formId: string): void {
+    exportFormData(formId) {
         const form = this.storageService.getFormById(formId);
         const responses = this.storageService.getFormResponses(formId);
-
         const exportData = {
             form,
             responses,
             exportDate: new Date().toISOString()
         };
-
         const dataStr = JSON.stringify(exportData, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
         const exportFileDefaultName = `form_${form?.title || 'untitled'}_export.json`;
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileDefaultName);
         linkElement.click();
     }
-
-    private renderFormCard(form: IForm): string {
+    renderFormCard(form) {
         const responseCount = this.storageService.getFormResponses(form.id).length;
-    
         return `
             <div class="form-card">
                 <div class="form-card-header">
@@ -154,30 +131,23 @@ class FormApp {
             </div>
         `;
     }
-
-    private createNewForm(): void {
+    createNewForm() {
         this.formListContainer.style.display = 'none';
         this.formBuilderContainer.style.display = 'block';
-
         this.formBuilder.createNewForm();
     }
-
-    private editForm(formId: string): void {
+    editForm(formId) {
         this.formListContainer.style.display = 'none';
         this.formBuilderContainer.style.display = 'block';
-
         this.formBuilder.loadForm(formId);
     }
-
-    private async previewForm(formId: string): Promise<void> {
+    async previewForm(formId) {
         const form = this.storageService.getFormById(formId);
-        if (!form) return;
-
+        if (!form)
+            return;
         this.formListContainer.style.display = 'none';
         this.formBuilderContainer.style.display = 'none';
-
         this.formPreviewContainer.style.display = 'block';
-
         this.formPreviewContainer.innerHTML = `
             <div class="container">
                 <div class="header">
@@ -192,8 +162,7 @@ class FormApp {
             </div>
         `;
     }
-
-    private renderPreviewField(field: any): string {
+    renderPreviewField(field) {
         switch (field.type) {
             case 'text':
                 return `
@@ -207,7 +176,7 @@ class FormApp {
                 return `
                     <div class="form-field">
                         <label>${field.label}</label>
-                        ${field.options?.map((option: any) => `
+                        ${field.options?.map((option) => `
                             <div class="radio-option">
                                 <input type="radio" id="${option.id}" name="${field.id}" 
                                        value="${option.value}" ${field.required ? 'required' : ''}>
@@ -220,7 +189,7 @@ class FormApp {
                 return `
                     <div class="form-field">
                         <label>${field.label}</label>
-                        ${field.options?.map((option: any) => `
+                        ${field.options?.map((option) => `
                             <div class="checkbox-option">
                                 <input type="checkbox" id="${option.id}" name="${field.id}" 
                                        value="${option.value}">
@@ -233,57 +202,48 @@ class FormApp {
                 return '';
         }
     }
-
-    private async handleFormSubmission(form: HTMLFormElement): Promise<void> {
+    async handleFormSubmission(form) {
         const formData = new FormData(form);
-        const formId = formData.get('formId') as string;
-
-        const response: IFormResponse = {
+        const formId = formData.get('formId');
+        const response = {
             id: crypto.randomUUID(),
             formId: formId,
             responses: [],
             submittedAt: new Date().toISOString()
         };
-
         for (const [key, value] of formData.entries()) {
-            if (key === 'formId') continue;
-
+            if (key === 'formId')
+                continue;
             if (formData.getAll(key).length > 1) {
                 response.responses.push({
                     fieldId: key,
                     value: formData.getAll(key).map(val => val.toString())
                 });
-            } else {
+            }
+            else {
                 response.responses.push({
                     fieldId: key,
                     value: value.toString()
                 });
             }
         }
-
         this.storageService.saveFormResponse(response);
-
         alert('Form submitted successfully!');
-
         this.showFormList();
     }
-
-    private deleteForm(formId: string): void {
+    deleteForm(formId) {
         if (confirm('Are you sure you want to delete this form? This action cannot be undone.')) {
             this.storageService.deleteForm(formId);
             this.showFormList();
         }
     }
-
-    private viewResponses(formId: string): void {
+    viewResponses(formId) {
         const form = this.storageService.getFormById(formId);
         const responses = this.storageService.getFormResponses(formId);
-
-        if (!form) return;
-
+        if (!form)
+            return;
         this.formListContainer.style.display = 'none';
         this.responsesContainer.style.display = 'block';
-
         this.responsesContainer.innerHTML = `
             <div class="container">
                 <div class="header">
@@ -294,12 +254,10 @@ class FormApp {
             </div>
         `;
     }
-
-    private renderResponsesTable(form: IForm, responses: IFormResponse[]): string {
+    renderResponsesTable(form, responses) {
         if (responses.length === 0) {
             return '<p>No responses yet.</p>';
         }
-
         return `
             <div class="table-container">
                 <table>
@@ -315,8 +273,8 @@ class FormApp {
                                 <td>${new Date(response.submittedAt).toLocaleString()}</td>
                                 ${form.fields.map(field => {
             const fieldResponse = response.responses.find(r => r.fieldId === field.id);
-            if (!fieldResponse) return '<td></td>';
-
+            if (!fieldResponse)
+                return '<td></td>';
             if (field.options && (field.type === FieldType.RADIO || field.type === FieldType.CHECKBOX)) {
                 if (Array.isArray(fieldResponse.value)) {
                     const selectedLabels = fieldResponse.value.map(value => {
@@ -324,12 +282,12 @@ class FormApp {
                         return option ? option.label : value;
                     });
                     return `<td>${selectedLabels.join(', ')}</td>`;
-                } else {
+                }
+                else {
                     const option = field.options.find(opt => opt.value === fieldResponse.value);
                     return `<td>${option ? option.label : fieldResponse.value}</td>`;
                 }
             }
-
             return `<td>${fieldResponse.value}</td>`;
         }).join('')}
                             </tr>
@@ -339,35 +297,28 @@ class FormApp {
             </div>
         `;
     }
-
-    private generateAnalytics(formId: string): string {
+    generateAnalytics(formId) {
         const form = this.storageService.getFormById(formId);
         const responses = this.storageService.getFormResponses(formId);
-
-        if (!form || !responses.length) return '<p>No responses yet</p>';
-
+        if (!form || !responses.length)
+            return '<p>No responses yet</p>';
         let analyticsHtml = '<div class="analytics-container">';
-
         form.fields.forEach(field => {
             analyticsHtml += `<div class="field-analytics">
                 <h3>${field.label}</h3>`;
-
             if (field.type === FieldType.RADIO || field.type === FieldType.CHECKBOX) {
-                const optionCounts = new Map<string, number>();
-
+                const optionCounts = new Map();
                 responses.forEach(response => {
                     const fieldResponse = response.responses.find(r => r.fieldId === field.id);
                     if (fieldResponse) {
                         const values = Array.isArray(fieldResponse.value)
                             ? fieldResponse.value
                             : [fieldResponse.value];
-
                         values.forEach(value => {
                             optionCounts.set(value, (optionCounts.get(value) || 0) + 1);
                         });
                     }
                 });
-
                 analyticsHtml += `<div class="option-stats">
                     ${Array.from(optionCounts.entries()).map(([option, count]) => `
                         <div class="stat-item">
@@ -376,28 +327,22 @@ class FormApp {
                         </div>
                     `).join('')}
                 </div>`;
-            } else {
-                const responseCount = responses.filter(r =>
-                    r.responses.some(resp => resp.fieldId === field.id)
-                ).length;
-
+            }
+            else {
+                const responseCount = responses.filter(r => r.responses.some(resp => resp.fieldId === field.id)).length;
                 analyticsHtml += `<p>${responseCount} responses</p>`;
             }
-
             analyticsHtml += '</div>';
         });
-
         analyticsHtml += '</div>';
         return analyticsHtml;
     }
-
-    private viewAnalytics(formId: string): void {
+    viewAnalytics(formId) {
         const form = this.storageService.getFormById(formId);
-        if (!form) return;
-
+        if (!form)
+            return;
         this.formListContainer.style.display = 'none';
         this.formBuilderContainer.style.display = 'none';
-
         this.formPreviewContainer.innerHTML = `
         <div class="container">
             <div class="header">
@@ -410,9 +355,7 @@ class FormApp {
         this.formPreviewContainer.style.display = 'block';
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     new FormApp();
 });
-
 export default FormApp;
